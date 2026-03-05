@@ -1,2 +1,90 @@
-int main()
-{}
+#include <cstddef>
+
+template< class T >
+struct BiList {
+  T val;
+  BiList<T>* next;
+  BiList<T>* prev;
+};
+
+template< class T >
+BiList<T>* add(BiList<T>* h, const T& d) {
+  if (!h) {
+    BiList<T>* p = new BiList<T>{d, nullptr, nullptr};
+    p->next = p->prev = p;
+    return p;
+  }
+  BiList<T>* after = h->next;
+  BiList<T>* p = new BiList<T>{d, after, h};
+  h->next = p;
+  after->prev = p;
+  return p;
+}
+
+template< class T >
+BiList<T>* insertBef(BiList<T>* right, const T& d) {
+  BiList<T>* left = right->prev;
+  BiList<T>* p = new BiList<T>{d, right, left};
+  right->prev = p;
+  left->next = p;
+  return p;
+}
+
+template< class T >
+BiList<T>* cut(BiList<T>* h) noexcept {
+  if (h->next == h) {
+    delete h;
+    return nullptr;
+  }
+  BiList<T>* n = h->next;
+  n->prev = h->prev;
+  h->prev->next = n;
+  delete h;
+  return n;
+}
+
+template< class T >
+BiList<T>* cutAft(BiList<T>* node) noexcept {
+  BiList<T>* d = node->next;
+  if (d == node) return nullptr;
+  node->next = d->next;
+  d->next->prev = node;
+  delete d;
+  return node->next;
+}
+
+template< class T >
+BiList<T>* cutBef(BiList<T>* node) noexcept {
+  BiList<T>* d = node->prev;
+  if (d == node) return nullptr;
+  node->prev = d->prev;
+  d->prev->next = node;
+  delete d;
+  return node->prev;
+}
+
+template< class T >
+BiList<T>* clear(BiList<T>* h, BiList<T>* t) noexcept {
+  while (h != t) {
+    h = cut(h);
+  }
+  return h;
+}
+
+template< class T >
+size_t size(BiList<T>* h) {
+  if (!h) return 0;
+  size_t cnt = 1;
+  for (BiList<T>* cur = h->next; cur != h; cur = cur->next) {
+    ++cnt;
+  }
+  return cnt;
+}
+
+template< class T, class F >
+F traverse(F f, BiList<T>* h, BiList<T>* t) {
+  for (BiList<T>* cur = h; cur != t; cur = cur->next) {
+    f(cur->val);
+  }
+  return f;
+}
